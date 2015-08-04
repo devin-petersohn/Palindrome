@@ -1,2 +1,2 @@
 # Palindrome
-A Palindrome Finder using Spark
+A Palindrome Finder using Apache Spark
