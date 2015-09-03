@@ -18,4 +18,4 @@ The current implementation is specific to our setup and pipeline. The `.txt1` fi
 
 The output is written to the current users HDFS under the directory `results/palindromes`.
 
-For more information, email Devin Petersohn at <dpvx8@mail.missouri.edu>
+For more information, email Devin Petersohn at <devin.petersohn@gmail.com>
