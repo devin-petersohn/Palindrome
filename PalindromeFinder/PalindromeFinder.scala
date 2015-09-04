@@ -160,7 +160,7 @@ object PalindromeFinder {
 			val initWindowSize = args(1).toInt
 
 			//if the file is shifted, add the shift to the positiion (*.txt4)
-			var shift = 0
+//			var shift = 0
 //			if(path1.takeRight(1) == "4") shift1 = 189
 			val file = sc.textFile(args(0), 80)
 			//species name
@@ -171,7 +171,7 @@ object PalindromeFinder {
 
 			val line_length = 200
 
-			val words = file.zipWithIndex.flatMap( l => ( l._1.sliding(initWindowSize).zipWithIndex.filter(seq => filterSeqs(seq._1, initWindowSize)).map( f => ((( f._1, chrID)),shift1 + ((f._2+1)+(line_length*(l._2))).toInt))))
+			val words = file.zipWithIndex.flatMap( l => ( l._1.sliding(initWindowSize).zipWithIndex.filter(seq => filterSeqs(seq._1, initWindowSize)).map( f => ((( f._1, chrID)),((f._2+1)+(line_length*(l._2))).toInt))))
 			val compWords = words.map(f => ((complement(f._1), -1 * (f._2 + f._1._1.length))))
 
 //			val path4 = i + "4"
@@ -258,7 +258,7 @@ object PalindromeFinder {
 
 			}//smallestPal
 
-		}//end loop through arguments
+		//}//end loop through arguments
 
 	}
 
