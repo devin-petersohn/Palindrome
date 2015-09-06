@@ -1,4 +1,4 @@
-name := "PalindromeFinder"
+name := "CleanUpData"
 
 version := "0.1"
 
