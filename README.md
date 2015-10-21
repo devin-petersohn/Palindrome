@@ -37,6 +37,8 @@ Two build files are included in this repository for compiling the scala script i
 
 You must be in the correct directory to run this command. 
 
-Once you have compiled the source code, you can run a spark job using the `spark-submit` command with the parameters required for your spark setup. The program requires that your FASTA chromosome file be passed as the only argument.
+######Future Work
+
+We will get a shell script that can automate this process, to include building and compiling the source.
 
 For more information, email Devin Petersohn at <devin.petersohn@gmail.com>
