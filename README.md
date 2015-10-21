@@ -8,14 +8,35 @@ Requirements for use:
 * Java 1.6
 * SBT 0.13.8
 
-A build file is included in this repository for compiling the scala script into a .jar file. To compile the code, please use the following command when you are in the Palindrome directory:
+This repository includes a full pipeline from cleaning the input sequence to outputting the palindromes to HDFS. 
+
+######Preparing the data
+
+To prepare the data, you will need to run the `cleanUp.c` script to properly parse the input data. The data doesn’t have to be very clean for this parser. You may pass in multiple fasta sequences delineated by `>IDENTIFIER` . The `IDENTIFIER` should be unique and meaningful to you, as this is how the results will stored for searching later.
+
+Once you have run the `cleanUp.c` script, you will need to run the `cleanUpData.scala` script. This script makes sure that the position count will be accurate during the processing. It outputs separate files for each fasta sequence. Currently the files are stored in the working directory, but that will change.
+
+######Running the Palindrome Finder
+
+`usage: spark-submit \`  
+`<spark parameters> <palindromefinder jar> \`  
+`<input filename> <minimum palindrome length>`
+
+* The `<spark parameters>` are typically specific to your system.
+* The `<palindromefinder jar>` is the jar that is output from `sbt`.
+* The `<input filename>` is a single filename for palindrome extraction. It must have been formatted by the other scripts in order to be guaranteed to run correctly.
+* The `<minimum palindrome length>` is the smallest size of palindrome you would like to extract.
+
+The output is written to the current users HDFS under the directory `results/palindromes/<input_filename>`.
+
+######Compiling the Source
+
+Two build files are included in this repository for compiling the scala script into a .jar file. To compile the code, please use the following command:
 
 `sbt package`
 
+You must be in the correct directory to run this command. 
+
 Once you have compiled the source code, you can run a spark job using the `spark-submit` command with the parameters required for your spark setup. The program requires that your FASTA chromosome file be passed as the only argument.
-
-The current implementation is specific to our setup and pipeline. The `.txt1` files are not shifted at all and the `.txt4` files are shifted by 189. This will be changed in future implementations.
-
-The output is written to the current users HDFS under the directory `results/palindromes`.
 
 For more information, email Devin Petersohn at <devin.petersohn@gmail.com>
