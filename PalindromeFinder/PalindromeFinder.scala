@@ -171,7 +171,7 @@ object PalindromeFinder {
 				if(iteration > 1) palindromes = coarseGrainedAggregation(applyPositionToSequence(palindromes), initWindowSize * iteration)
 				iteration *= 2
 				palindromes = extractPalindromes(palindromes, initWindowSize * iteration)
-				if(!palindromes.isEmpty) palindromes.saveAsObjectFile("results/palindromes/" + initWindowSize * iteration + "/" + chrID)
+				if(!palindromes.isEmpty) palindromes.saveAsObjectFile("results/other_researcher_data/palindromes/" + initWindowSize * iteration + "/" + chrID)
 				else break
 			}
 		}
