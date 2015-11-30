@@ -167,7 +167,7 @@ object PalindromeFinder {
 		var iteration = 1
 		
 		breakable{
-			while(1){			
+			while(true){			
 				if(iteration > 1) palindromes = coarseGrainedAggregation(applyPositionToSequence(palindromes), initWindowSize * iteration)
 				iteration *= 2
 				palindromes = extractPalindromes(palindromes, initWindowSize * iteration)
