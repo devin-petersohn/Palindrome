@@ -171,9 +171,9 @@ object PalindromeFinder {
 			while(true){			
 				if(iteration > 1) repeated_sequences = coarseGrainedAggregation(applyPositionToSequence(repeated_sequences), initWindowSize * iteration)
 
-				palindromes = extractPalindromes(palindromes, initWindowSize * iteration)
+				palindromes = extractPalindromes(repeated_sequences, initWindowSize * iteration)
 				if(!palindromes.isEmpty) palindromes.saveAsObjectFile("results/other_researcher_data/palindromes/" + initWindowSize * iteration + "/" + chrID)
-				
+
 				else break
 				iteration *= 2
 			}
