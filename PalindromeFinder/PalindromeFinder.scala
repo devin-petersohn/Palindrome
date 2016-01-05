@@ -168,9 +168,9 @@ object PalindromeFinder {
 		
 		breakable{
 			while(1){			
-				if(iteration > 1) palindromes = coarseGrainedAggregation(applyPositionToSequence(palindromes), initWindowSize * iteration)
+				if(iteration > 1) repeated_sequences = coarseGrainedAggregation(applyPositionToSequence(palindromes), initWindowSize * iteration)
 				iteration *= 2
-				palindromes = extractPalindromes(palindromes, initWindowSize * iteration)
+				palindromes = extractPalindromes(repeated_sequences, initWindowSize * iteration)
 				if(!palindromes.isEmpty) palindromes.saveAsObjectFile("results/palindromes/" + initWindowSize * iteration + "/" + chrID)
 				else break
 			}
