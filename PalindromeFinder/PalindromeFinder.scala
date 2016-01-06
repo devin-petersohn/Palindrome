@@ -167,7 +167,7 @@ object PalindromeFinder {
 		var repeated_sequences = allWords
 		var iteration = 1
 
-/*		
+		breakable {
 			while(true){			
 				if(iteration > 1) repeated_sequences = coarseGrainedAggregation(applyPositionToSequence(repeated_sequences), initWindowSize * iteration)
 
@@ -179,9 +179,9 @@ object PalindromeFinder {
 			}
 		}
 
-*/
-//Below is the old method.
 
+//Below is the old method.
+/*
 		val smallestPalindromes = extractPalindromes(allWords, initWindowSize)
 		if(!smallestPalindromes.isEmpty) {
 			smallestPalindromes.saveAsObjectFile("results/other_researcher_data/palindromes/" + initWindowSize + "/" + chrID)
@@ -251,7 +251,7 @@ object PalindromeFinder {
 			}//doublePal
 
 		}//smallestPal
-
+*/
 	}
 
 }
