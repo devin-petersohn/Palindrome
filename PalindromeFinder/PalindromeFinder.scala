@@ -9,20 +9,41 @@ import org.apache.spark.SparkConf
 import org.apache.log4j.PropertyConfigurator
 
 object PalindromeFinder {
-	//
-	//filter out these strings to reduce dataset
-	//
+	/*
+	*
+	* Method: filterSeqs
+	* Purpose: Filters out strings that contain invalid characters to reduce dataset
+	* Parameters:
+	* 	string: String
+	*		The string to be verfied
+	*	initWindowSize: Int
+	*		The initial size of the sliding window
+	* Return: Boolean
+	*	Valid string returns true
+	*	Invalid string returns false
+	*
+	*/
 	def filterSeqs(string: String, initWindowSize: Int): Boolean = {
-		if(string.contains("N")) return false
+		//if(string.contains("N")) return false
 		for(i <- string) {
 			if(i != 'A' && i != 'C' && i != 'T' && i != 'G') return false
 		}
 		return true
 	}
 
-	//
-	//ensures that there is a positive and negative value in the list
-	//
+	/*
+	*
+	* Method: positiveAndNegative
+	* Purpose: Ensures that there is a positive and negative value in the list.
+	*	This is how we verify that the sequence exists on both strands.
+	* Parameters:
+	*	list: Iterable[Int]
+	*		The list of positions that will be verified.
+	* Return: Boolean
+	*	Valid list of positions returns true
+	*	Invalid list of positions returns false
+	*
+	*/
 	def positiveAndNegative(list: Iterable[Int]): Boolean = {
 		var neg = false
 		var pos = false
@@ -37,9 +58,24 @@ object PalindromeFinder {
 		else return false
 	}
 
-	//
-	//function to verify palindromic, checks the candidates against each other
-	//
+	/*
+	*
+	* Method: verifyPalindromic
+	* Purpose: Checks the candidate palindromes against each other, verifying that the sequence is palindromic.
+	*	This is where we check for overlap in the main algorithm. Finds palindromes from input length to 2 * input length.
+	* Parameters: 
+	*	list: Iterable[Int]
+	*		The list of positions for a candidate. Some of these positions may be valid while others may not be.
+	*	length: Int
+	*		The length of the current k-block
+	* Return: Iterable[(Int, Int)]
+	*	Returns a collection of tuples that represent valid overlapping pairs.
+	* 		The first value in each tuple is the starting position of a verified palindrome
+	*		The second value in each tuple is the ending position of a verified palindrome
+	*			This value is translated back to the input strand position before being added to the collection
+	*		If no values exist, returns an empty collection
+	*
+	*/
 	def verifyPalindromic(list: Iterable[Int], length: Int): Iterable[((Int,Int))] = {
 		val negVals = list.filter(_ < 0)
 		val posVals = list.filter(_ > 0)
@@ -54,17 +90,36 @@ object PalindromeFinder {
 		return finalList
 	}
 
-	//
-	//helper function for filterNonPalindromic
-	//
+	/*
+	*
+	* Method: possiblePalindrome
+	* Purpose: Helper function for filterNonPalindromic, checks that each pair is complemetary
+	* Parameters:
+	*	string: String
+	*		The input string to be verified
+	* Return: Boolean
+	*	Valid input string returns true
+	*	Invalid input string returns false
+	*
+	*/
 	def possiblePalindrome(string: String): Boolean = {
 		if( string.contains("AT") || string.contains("TA") || string.contains("CG") || string.contains("GC")) return true
 		else return false
 	}
 
-	//
-	//fine-grained function to filter out those sequences that could not possibly be palindromic
-	//
+	/*
+	*
+	* Method: filterNonPalindromic
+	* Purpose: Fine-grained function to filter out those sequences that could not possibly be palindromic
+	*	Checks that there is no pair around which each pair branching out from the center is complementary
+	* Parameters:
+	*	string: String
+	*		The input string to be verified
+	* Return: Boolean
+	*	Valid input string returns true
+	*	Invalid input string returns false
+	*
+	*/
 	def filterNonPalindromic(string: String): Boolean = {
 		var mid = string.length/2
 		val shift = 1
@@ -88,9 +143,23 @@ object PalindromeFinder {
 		return false
 	}
 
-	//
-	//gets the full palindromic sequence based on the overlap
-	//
+	/*
+	*
+	* Method: extendPalindromicSequence
+	* Purpose: Extends the full palindromic sequence based on the overlap
+	* Parameters:
+	*	palindrome: ((String, String), Array[((Int, Int))])
+	*		The palindrome to be extended.
+	*			candidates._1._1: the sequence to be extended
+	*			candidates._1._2: the identification of the origin of this specific sequence
+	*			candidates._2: an array of starting and stopping positions for each instance of a palindrome from the given sequence
+	* Return: Array[((String, String), Int)]
+	*	Returns a collection of tuples that consists of all fully extended palindromes from the input sequence in the origin
+	*		returned._1._1: the full palindrome after extension
+	*		returned._1._2: the identification of the origin of this specific sequence
+	*		returned._2: the starting position of this specific palindrome
+	*
+	*/
 	def extendPalindromicSequence(palindrome: ((String,String), Array[((Int,Int))])): Array[((String,String), Int)] = {
 		val positions = palindrome._2
 		val sequence = palindrome._1._1
@@ -103,9 +172,25 @@ object PalindromeFinder {
 		return finalList.toArray
 	}
 
-	//
-	//Palindrome extraction phase of the algorithm.  Checks for overlap to identify palilndrome
-	//
+	/*
+	*
+	* Method: extractPalindromes
+	* Purpose: Palindrome extraction phase of the algorithm.  Checks for overlap to identify palilndrome
+	* Parameters:
+	*	candidates: org.apache.spark.rdd.RDD[((String, String), Iterable[(Int)])]
+	*		An RDD of candidate sequences that have passed the fine grained filter.
+	*			candidates[]._1._1: the sequence to be extended
+	*			candidates[]._1._2: the identification of the origin of this specific sequence
+	*			candidates[]._2: a collection of starting positions for each instance of a given sequence
+	*	currentLength: Int
+	*		The length of the current k-block
+	* Return: org.apache.spark.rdd.RDD[((String, String), Iterable[(Int)])]
+	*	An RDD of all palindromes between the currentLength and 2 * currentLength
+	*		returned[]._1._1: a palindromic sequence
+	*		returned[]._1._2: the identification of the origin of this specific sequence
+	*		returned[]._2: a collection of starting positions for each instance of a given palindrome
+	*
+	*/
 	def extractPalindromes(candidates: org.apache.spark.rdd.RDD[((String, String), Iterable[(Int)])], currentLength: Int): org.apache.spark.rdd.RDD[((String, String), Iterable[(Int)])] = {
 		return (candidates
 		.map(f => ((f._1, ((f._2.filter(_ > 0), f._2.filter(_ < 0)))))).filter(t => t._2._1.size > 0 && t._2._2.size > 0)
@@ -115,22 +200,68 @@ object PalindromeFinder {
 		.filter(f => positiveAndNegative(f)).map(z => verifyPalindromic(z, currentLength)).flatten).toSet.toArray))).filter(h => h._2.size > 0).flatMap(pal => extendPalindromicSequence(pal)).groupByKey)
 	}
 
-	//
-	//calculates the reverse complement of the string
-	//
+	/*
+	*
+	* Method: complement
+	* Purpose: Calculates the reverse complement of the string
+	* Parameters:
+	* 	sequence: ((String, String))
+	*		A tuple that represents a given string.
+	*			sequence._1: the sequence to have the reverse compelement calculated
+	*			sequence._2: the identification of the origin of this specific sequence
+	* Return: ((String, String))
+	*	Returns a tuple that contains the reverse complement of the input sequence.
+	*		returned._1: the reverse compelement of the input sequence
+	*		returned._2: the identification of the origin of this specific sequence
+	*
+	*/
 	def complement(sequence: ((String,String))): ((String,String)) = {
 		return (((sequence._1.replace('A','*').replace('T','A').replace('*','T').replace('C','*').replace('G','C').replace('*','G')).reverse, sequence._2))
 	}
 
-	//function to merge adjacent blocks together
+	/*
+	* 
+	* Method: merge
+	* Purpose: Merges the strings of adjacent blocks together as a part of the doubling phase of the algorithm
+	* Parameters:
+	*	x: ((String, String))
+	*		The first input string. Whether this string occurs first in the original sequence is unkown.
+	*			x._1: the input sequence
+	*			x._2: the identification of the origin of this specific sequence
+	*	y: ((String, String))
+	*		The second input string. Whether this string occurs first in the original sequence is unkown.
+	*			y._1: the input sequence
+	*			y._2: the identification of the origin of this specific sequence
+	* Return: ((String, String))
+	*	Returns a tuple that contains the merged string that has been doubled.
+	*		returned._1: the merged string
+	*		returned._2: the identification of the origin of this specific sequence
+	*
+	*/
 	def merge(x: ((String,String)), y: ((String,String))): ((String,String)) = { 
 		if(x._1.contains("*")) return ((x._1.dropRight(1)+y._1 , x._2))
 		else return ((y._1.dropRight(1)+x._1, x._2))
 	}
 
-	//
-	//function to merge adjacent building blocks, effectively doubling the size of the blocks and removing non-repeats
-	//
+	/*
+	*
+	* Method: coarseGrainedAggregation
+	* Purpose: Merges adjacent building blocks, effectively doubling the size of the blocks and removing non-repeats
+	* Parameters:
+	*	blocks: org.apache.spark.rdd.RDD[((String, String), Int)]
+	*		An RDD of k-blocks.
+	*			blocks[]._1._1: the sequence of the current k-block
+	*			blocks[]._1._2: the indentification of the origin of this specific sequence
+	*			blocks[]._2: the position of this individual k-block
+	*	windowSize: Int
+	*		The size of the current k-block.
+	* Return: org.apache.spark.rdd.RDD[((String, String), Iterable[(Int)])]
+	*	An RDD of doubled sequences to be verified. 
+	*		returned[]._1._1: the sequence of the doubled k-block
+	*		returned[]._1._2: the identification of the origin of this specific sequence
+	*		returned[]._2: a collection of all position of this specific sequence
+	*
+	*/
 	def coarseGrainedAggregation(blocks: org.apache.spark.rdd.RDD[((String, String), Int)], windowSize: Int): org.apache.spark.rdd.RDD[((String, String), Iterable[(Int)])] = {
 		return blocks.map(_.swap)
 		.flatMap(f => Iterable((f._1,f._2),((f._1 + f._2._1.length),((f._2._1+"*",f._2._2)))))
@@ -141,14 +272,39 @@ object PalindromeFinder {
 		.filter(_._2.size>1)
 	}
 
-	//
-	//Fans out the tuples such that every tuple has exactly one position
-	//
-	def applyPositionToSequence(groupedPos: org.apache.spark.rdd.RDD[((String,String), Iterable[Int])]) :org.apache.spark.rdd.RDD[((String, String), Int)] = {
+	/*
+	*
+	* Method: applyPositionToSequence
+	* Purpose: Fans out the tuples such that every tuple has exactly one position. The collection of positions is applied to the sequence.
+	* Parameters:
+	*	groupedPos: org.apache.spark.rdd.RDD[((String,String), Iterable[Int])]
+	*		An RDD of tuples which contains all positions of each sequence grouped together in a collection
+	*			groupedPos[]._1._1: the sequence
+	*			groupedPos[]._1._2: the identification of the origin of this specific sequence
+	*			groupedPos[]._2: the collection of positions that contains all occurrences of this sequence
+	* Return: org.apache.spark.rdd.RDD[((String, String), Int)]
+	*	An RDD of tuples that contains all positions, however they are no longer grouped
+	*		returned[]._1._1: the sequence
+	*		returned[]._1._2: the identification of the origin of this specific sequence
+	*		returned[]._2: a position of an instance of this sequence
+	*
+	*/
+	def applyPositionToSequence(groupedPos: org.apache.spark.rdd.RDD[((String,String), Iterable[Int])]) : org.apache.spark.rdd.RDD[((String, String), Int)] = {
 		return groupedPos.flatMap(f => f._2.map(g => ((f._1, g))))
 	}
 
-
+	/*
+	*
+	* Method: main
+	* Purpose: Extract all palindromic sequences starting from an initial length up to an arbitrary size
+	* Parameters: 
+	*	args: Array[String]
+	*		The arguments to the main program are as follows:
+	*			args[0]: The filename of the FASTA file. All palindromes will be extracted from this sequence
+	*			args[1]: The minimum length of palindrome to be extracted.
+	* Return: NOT USED
+	*
+	*/
 	def main(args: Array[String]) = {
 		
 		val sc = new SparkContext()
@@ -163,8 +319,11 @@ object PalindromeFinder {
 
 		//all the words of length equal to initWindowSize
 		val allWords = sc.union(words,compWords).groupByKey
+		//set this variable for the start of the loop
 		var palindromes = allWords
+		//set this variable for the start of the loop
 		var repeated_sequences = allWords
+		//iteration will double for every time the loop is completed
 		var iteration = 1
 
 		breakable {
