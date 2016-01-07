@@ -151,12 +151,12 @@ object PalindromeFinder {
 	*	palindrome: ((String, String), Array[((Int, Int))])
 	*		The palindrome to be extended.
 	*			candidates._1._1: the sequence to be extended
-	*			candidates._1._2: the identification of the origin of this specific sequence
+	*			candidates._1._2: the identification of the origin of this specific sequence (chromosome id and species id)
 	*			candidates._2: an array of starting and stopping positions for each instance of a palindrome from the given sequence
 	* Return: Array[((String, String), Int)]
 	*	Returns a collection of tuples that consists of all fully extended palindromes from the input sequence in the origin
 	*		returned._1._1: the full palindrome after extension
-	*		returned._1._2: the identification of the origin of this specific sequence
+	*		returned._1._2: the identification of the origin of this specific sequence (chromosome id and species id)
 	*		returned._2: the starting position of this specific palindrome
 	*
 	*/
@@ -180,24 +180,29 @@ object PalindromeFinder {
 	*	candidates: org.apache.spark.rdd.RDD[((String, String), Iterable[(Int)])]
 	*		An RDD of candidate sequences that have passed the fine grained filter.
 	*			candidates[]._1._1: the sequence to be extended
-	*			candidates[]._1._2: the identification of the origin of this specific sequence
+	*			candidates[]._1._2: the identification of the origin of this specific sequence (chromosome id and species id)
 	*			candidates[]._2: a collection of starting positions for each instance of a given sequence
 	*	currentLength: Int
 	*		The length of the current k-block
 	* Return: org.apache.spark.rdd.RDD[((String, String), Iterable[(Int)])]
 	*	An RDD of all palindromes between the currentLength and 2 * currentLength
 	*		returned[]._1._1: a palindromic sequence
-	*		returned[]._1._2: the identification of the origin of this specific sequence
+	*		returned[]._1._2: the identification of the origin of this specific sequence (chromosome id and species id)
 	*		returned[]._2: a collection of starting positions for each instance of a given palindrome
 	*
 	*/
 	def extractPalindromes(candidates: org.apache.spark.rdd.RDD[((String, String), Iterable[(Int)])], currentLength: Int): org.apache.spark.rdd.RDD[((String, String), Iterable[(Int)])] = {
 		return (candidates
-		.map(f => ((f._1, ((f._2.filter(_ > 0), f._2.filter(_ < 0)))))).filter(t => t._2._1.size > 0 && t._2._2.size > 0)
+		.map(f => ((f._1, ((f._2.filter(_ > 0), f._2.filter(_ < 0))))))
+		.filter(t => t._2._1.size > 0 && t._2._2.size > 0)
 		.filter(candidate => filterNonPalindromic(candidate._1._1))
-		.map(g=> ((g._1, ((g._2._1.flatMap(f => List(((f+currentLength - 1)/currentLength, f),((f)/currentLength, f))) ++ g._2._2.flatMap(f => List(((Math.abs(((f * -1) - currentLength)/currentLength), f)),((Math.abs(((f * -1) - 1)/currentLength), f)))))
-		.groupBy(_._1).map(f => f._2.map(x => x._2))
-		.filter(f => positiveAndNegative(f)).map(z => verifyPalindromic(z, currentLength)).flatten).toSet.toArray))).filter(h => h._2.size > 0).flatMap(pal => extendPalindromicSequence(pal)).groupByKey)
+		.map(g=> ((g._1, ((g._2._1.flatMap(f => 
+				List(((f+currentLength - 1)/currentLength, f),((f)/currentLength, f))) ++ g._2._2.flatMap(f => List(((Math.abs(((f * -1) - currentLength)/currentLength), f)),((Math.abs(((f * -1) - 1)/currentLength), f)))))
+				.groupBy(_._1).map(f => f._2.map(x => x._2))
+				.filter(f => positiveAndNegative(f)).map(z => verifyPalindromic(z, currentLength)).flatten).toSet.toArray)))
+		.filter(h => h._2.size > 0)
+		.flatMap(pal => extendPalindromicSequence(pal))
+		.groupByKey)
 	}
 
 	/*
@@ -208,11 +213,11 @@ object PalindromeFinder {
 	* 	sequence: ((String, String))
 	*		A tuple that represents a given string.
 	*			sequence._1: the sequence to have the reverse compelement calculated
-	*			sequence._2: the identification of the origin of this specific sequence
+	*			sequence._2: the identification of the origin of this specific sequence (chromosome id and species id)
 	* Return: ((String, String))
 	*	Returns a tuple that contains the reverse complement of the input sequence.
 	*		returned._1: the reverse compelement of the input sequence
-	*		returned._2: the identification of the origin of this specific sequence
+	*		returned._2: the identification of the origin of this specific sequence (chromosome id and species id)
 	*
 	*/
 	def complement(sequence: ((String,String))): ((String,String)) = {
@@ -227,15 +232,15 @@ object PalindromeFinder {
 	*	x: ((String, String))
 	*		The first input string. Whether this string occurs first in the original sequence is unkown.
 	*			x._1: the input sequence
-	*			x._2: the identification of the origin of this specific sequence
+	*			x._2: the identification of the origin of this specific sequence (chromosome id and species id)
 	*	y: ((String, String))
 	*		The second input string. Whether this string occurs first in the original sequence is unkown.
 	*			y._1: the input sequence
-	*			y._2: the identification of the origin of this specific sequence
+	*			y._2: the identification of the origin of this specific sequence (chromosome id and species id)
 	* Return: ((String, String))
 	*	Returns a tuple that contains the merged string that has been doubled.
 	*		returned._1: the merged string
-	*		returned._2: the identification of the origin of this specific sequence
+	*		returned._2: the identification of the origin of this specific sequence (chromosome id and species id)
 	*
 	*/
 	def merge(x: ((String,String)), y: ((String,String))): ((String,String)) = { 
@@ -258,7 +263,7 @@ object PalindromeFinder {
 	* Return: org.apache.spark.rdd.RDD[((String, String), Iterable[(Int)])]
 	*	An RDD of doubled sequences to be verified. 
 	*		returned[]._1._1: the sequence of the doubled k-block
-	*		returned[]._1._2: the identification of the origin of this specific sequence
+	*		returned[]._1._2: the identification of the origin of this specific sequence (chromosome id and species id)
 	*		returned[]._2: a collection of all position of this specific sequence
 	*
 	*/
@@ -280,12 +285,12 @@ object PalindromeFinder {
 	*	groupedPos: org.apache.spark.rdd.RDD[((String,String), Iterable[Int])]
 	*		An RDD of tuples which contains all positions of each sequence grouped together in a collection
 	*			groupedPos[]._1._1: the sequence
-	*			groupedPos[]._1._2: the identification of the origin of this specific sequence
+	*			groupedPos[]._1._2: the identification of the origin of this specific sequence (chromosome id and species id)
 	*			groupedPos[]._2: the collection of positions that contains all occurrences of this sequence
 	* Return: org.apache.spark.rdd.RDD[((String, String), Int)]
 	*	An RDD of tuples that contains all positions, however they are no longer grouped
 	*		returned[]._1._1: the sequence
-	*		returned[]._1._2: the identification of the origin of this specific sequence
+	*		returned[]._1._2: the identification of the origin of this specific sequence (chromosome id and species id)
 	*		returned[]._2: a position of an instance of this sequence
 	*
 	*/
