@@ -10,17 +10,48 @@ Requirements for use:
 
 This repository includes a full pipeline from cleaning the input sequence to outputting the palindromes to HDFS. 
 
+####Using the included `master_run_script.sh`
+######Single job mode
+
+This mode will give you prompts for every input and walk you through every step to ensure the output is correct. Simply run the script: 
+
+	bash master_run_script.sh 
+
+If you do not include any arguments, you will run this script in Single job mode.
+
+######Batch job mode
+This mode will allow you to pass in all the parameters at a single time to allow for large scale batch processing. Run the script as follows:
+
+	usage: bash master_run_script.sh \
+	<filepath> <minimum> <master> \
+	<executor_num> <executor_mem> \  
+	<executor_cores> <master_mem> 
+
+If you do not include enough parameters, the script will not allow you to continue. You must run in either Single or Batch job mode.
+
+####Manually Building and Running the Project
 ######Preparing the data
 
 To prepare the data, you will need to run the `cleanUp.c` script to properly parse the input data. The data doesn’t have to be very clean for this parser. You may pass in multiple fasta sequences delineated by `>IDENTIFIER` . The `IDENTIFIER` should be unique and meaningful to you, as this is how the results will stored for searching later.
 
-Once you have run the `cleanUp.c` script, you will need to run the `cleanUpData.scala` script. This script makes sure that the position count will be accurate during the processing. It outputs separate files for each fasta sequence. Currently the files are stored in the working directory, but that will change.
+* Step 1: Compile and run `cleanUp.c`. There is an included Makefile for convenience.
+	
+		usage: cleanUpFirst <fasta_file>
+
+* Step 2: Compile and run `cleanUpData.scala`. There is an included SBT build file for convenience.
+
+		usage: spark-submit \
+		target/scala-2.10/cleanupdata_2.10-0.1.jar \
+		../intermediate_data/cleanOutput_stage1.txt \
+		<minimum_palindrome_length>
 
 ######Running the Palindrome Finder
 
-`usage: spark-submit \`  
-`<spark parameters> <palindromefinder jar> \`  
-`<input filename> <minimum palindrome length>`
+First, you must build the Spark project using the included SBT build file. Once the project has been built, you may run with the following syntax:
+
+	usage: spark-submit \
+	<spark parameters> <palindromefinder jar> \
+	<input filename> <minimum palindrome length>
 
 * The `<spark parameters>` are typically specific to your system.
 * The `<palindromefinder jar>` is the jar that is output from `sbt`.
@@ -33,12 +64,9 @@ The output is written to the current users HDFS under the directory `results/pal
 
 Two build files are included in this repository for compiling the scala script into a .jar file. To compile the code, please use the following command:
 
-`sbt package`
+	sbt package
 
 You must be in the correct directory to run this command. 
 
-######Future Work
-
-We will get a shell script that can automate this process, to include building and compiling the source.
 
 For more information, email Devin Petersohn at <devin.petersohn@gmail.com>
