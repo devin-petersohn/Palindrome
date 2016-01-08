@@ -71,7 +71,7 @@ object PalindromeFinder {
 	* Return: Iterable[(Int, Int)]
 	*	Returns a collection of tuples that represent valid overlapping pairs.
 	* 		The first value in each tuple is the starting position of a verified palindrome
-	*		The second value in each tuple is the ending position of a verified palindrome
+	*		The second value in each tuple is the length of the verified palindrome
 	*			This value is translated back to the input strand position before being added to the collection
 	*		If no values exist, returns an empty collection
 	*
@@ -152,7 +152,7 @@ object PalindromeFinder {
 	*		The palindrome to be extended.
 	*			candidates._1._1: the sequence to be extended
 	*			candidates._1._2: the identification of the origin of this specific sequence (chromosome id and species id)
-	*			candidates._2: an array of starting and stopping positions for each instance of a palindrome from the given sequence
+	*			candidates._2: an array of starting positions and lengths for each instance of a palindrome from the given sequence
 	* Return: Array[((String, String), Int)]
 	*	Returns a collection of tuples that consists of all fully extended palindromes from the input sequence in the origin
 	*		returned._1._1: the full palindrome after extension

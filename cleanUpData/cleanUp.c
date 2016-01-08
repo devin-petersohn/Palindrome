@@ -8,7 +8,7 @@
 int main(int argc, char **argv) {
 
 	FILE* dirtyInput = fopen(argv[1], "r");
-	FILE* cleanOutput = fopen("cleanOutput.txt", "w");
+	FILE* cleanOutput = fopen("../intermediate_data/cleanOutput_stage1.txt", "w");
 
 	char* temporary_input_string = malloc(sizeof(char) * BUFFER_LINES_IN);
 	

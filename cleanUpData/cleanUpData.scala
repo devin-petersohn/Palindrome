@@ -1,4 +1,3 @@
-//import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
 import java.io.{FileReader, FileNotFoundException, IOException}
 import java.io._
@@ -7,7 +6,8 @@ object Cleanup {
 	def main(args: Array[String]) = {
 
 		val filename = args(0)
-		var pw = new PrintWriter(new File("temporary_fasta_file.txt"))
+		var pw = new PrintWriter(new File("../intermediate_data/temporary_fasta_file.txt"))
+		var path = "../intermediate_data/"
 		var prevline = ""
 		var fasta_id = ""
 		var lineNum = 1
@@ -25,7 +25,7 @@ object Cleanup {
 					//pw.write(prevline + "\n")
 					pw.close
 					fasta_id = line
-					pw = new PrintWriter(new File(fasta_id.drop(1).filterNot(_ == ' ').replace(':', '_').replace('|', '_') + ".txt"))
+					pw = new PrintWriter(new File(path+fasta_id.drop(1).filterNot(_ == ' ').replace(':', '_').replace('|', '_') + ".txt"))
 					prevline = ""
 				}
 				lineNum += 1
