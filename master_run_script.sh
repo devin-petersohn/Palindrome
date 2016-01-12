@@ -1,15 +1,9 @@
-echo -e "
-
+echo -e "\n
 ==========================    PalindromeFinder    ==========================
 ==========================        iDas Lab        ==========================
 ==========================         v. 0.1         ==========================
-
-
-Please note: This script only supports one FASTA file at a time
-
-
-Please wait while the scripts are compiled and prepared.
-"
+\n\nPlease note: This script only supports one FASTA file at a time
+\n\nPlease wait while the scripts are compiled and prepared.\n"
 
 (cd cleanUpData && make all)
 rm -rf intermediate_data
@@ -18,8 +12,7 @@ mkdir intermediate_data
 (cd PalindromeFinder && sbt package)
 
 if test "$#" -eq 0; then
-echo -e "
-Please give the path to the file you would like to process:"
+echo -e "\nPlease give the path to the file you would like to process:"
 read filepath
 (cd cleanUpData && ./cleanUpFirst $filepath)
 	if test "$?" -ne 0; then
@@ -43,7 +36,6 @@ read executor_cores
 echo -e "Master memory? \c"
 read master_mem
 
-echo -e "\nThank you. Starting to process. Please wait...\c"
 echo -e "\nDeleting intermediate_data directory on HDFS. Continue? Y/N:	\c"
 read continue_choice
 if [ "$continue_choice" = "N" ] || [ "$continue_choice" = "n" ]; then
@@ -57,11 +49,14 @@ do
 done
 
 hadoop fs -rm -r intermediate_data
+echo -e "Transferring Files to HDFS. Please wait...\c"
 hadoop fs -put intermediate_data
+
+echo -e "\n\nTransfer complete. Starting to process. Please wait...\c"
 
 for f in `hadoop fs -ls intermediate_data`
 do
-	(cd PalindromeFinder && spark-submit --master $master --driver-memory $master_mem --num-executors $executor_num --executor-cores $executor_cores --executor-memory $executor_mem --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/../intermediate_data/$f $minimum)
+	(cd PalindromeFinder && spark-submit --master $master --driver-memory $master_mem --num-executors $executor_num --executor-cores $executor_cores --executor-memory $executor_mem --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar intermediate_data/$f $minimum)
 done
 
 exit
@@ -85,9 +80,12 @@ master_mem=$7
 (cd cleanUpData && spark-submit target/scala-2.10/cleanupdata_2.10-0.1.jar ../intermediate_data/cleanOutput_stage1.txt $minimum)
 rm intermediate_data/cleanOutput_stage1.txt
 
+hadoop f -rm -r intermediate_data
+hadoop fs -put intermediate_data
+
 for f in `ls intermediate_data`
 do
-	(cd PalindromeFinder && spark-submit --master $master --driver-memory $master_mem --num-executors $executor_num --executor-cores $executor_cores --executor-memory $executor_mem --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/../intermediate_data/$f $minimum)
+	(cd PalindromeFinder && spark-submit --master $master --driver-memory $master_mem --num-executors $executor_num --executor-cores $executor_cores --executor-memory $executor_mem --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar intermediate_data/$f $minimum)
 done
 
 
