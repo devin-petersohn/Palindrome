@@ -5,6 +5,7 @@ import java.io._
 object Cleanup {
 	def main(args: Array[String]) = {
 
+		val sc = new SparkContext()
 		val filename = args(0)
 		//var pw = new PrintWriter(new File("../intermediate_data/temporary_fasta_file.txt"))
 		var path = "../intermediate_data/"
