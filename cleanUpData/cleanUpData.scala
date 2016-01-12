@@ -1,6 +1,7 @@
 import scala.io.Source
 import java.io.{FileReader, FileNotFoundException, IOException}
 import java.io._
+import org.apache.spark.SparkContext
 
 object Cleanup {
 	def main(args: Array[String]) = {
