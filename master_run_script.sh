@@ -52,7 +52,7 @@ Thank you. Starting to process. Please wait...
 
 for f in `ls intermediate_data`
 do
-	(cd PalindromeFinder && spark-submit --master $master --driver-memory $master_mem --num-executors $executor_num --executor-cores executor-cores --executor-memory executor_mem --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar ../intermediate_data/$f $minimum)
+	(cd PalindromeFinder && spark-submit --master $master --driver-memory $master_mem --num-executors $executor_num --executor-cores $executor-cores --executor-memory $executor_mem --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar ../intermediate_data/$f $minimum)
 done
 
 exit
