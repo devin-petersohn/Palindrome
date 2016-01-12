@@ -19,22 +19,20 @@ mkdir intermediate_data
 
 if test "$#" -eq 0; then
 echo -e "
-Please give the path to the file you would like to process:	\c"
+Please give the path to the file you would like to process:"
 read filepath
 (cd cleanUpData && ./cleanUpFirst $filepath)
 	if test "$?" -ne 0; then
-		echo -e "Error encountered.
-"
+		echo -e "Error encountered."
 		exit
 	fi
 echo -e "What is the minimum length palindrome you would like to identify?  \c"
 read minimum
-echo -e "
-Please wait while the file is parsed and prepared..."
+echo -e "Please wait while the file is parsed and prepared...\c"
 (cd cleanUpData && spark-submit target/scala-2.10/cleanupdata_2.10-0.1.jar ../intermediate_data/cleanOutput_stage1.txt $minimum)
 rm intermediate_data/cleanOutput_stage1.txt
-echo -e "Please enter the following Spark configuration parameters: 
-Master Node? \c"
+echo -e "\n"
+echo -e "Please enter the following Spark configuration parameters: \nMaster Node? \c"
 read master 
 echo -e "Number of executors? \c"
 read executor_num
@@ -45,11 +43,23 @@ read executor_cores
 echo -e "Master memory? \c"
 read master_mem
 
-echo -e "
-Thank you. Starting to process. Please wait...
-"
+echo -e "\nThank you. Starting to process. Please wait...\c"
+echo -e "\nDeleting intermediate_data directory on HDFS. Continue? Y/N:	\c"
+read continue_choice
+if [ "$continue_choice" = "N" ] || [ "$continue_choice" = "n" ]; then
+	exit
+fi
+while [ "$continue_choice" = "Y" ] || [ "$continue_choice" = "y" ]
+do
+	echo -e "Invalid input. "
+	echo -e "Continue? Y/N:	\c"
+	read continue_choice
+done
 
-for f in `ls intermediate_data`
+hadoop fs -rm -rf intermediate_data
+hadoop fs -put intermediate_data
+
+for f in `hadoop fs -ls intermediate_data`
 do
 	(cd PalindromeFinder && spark-submit --master $master --driver-memory $master_mem --num-executors $executor_num --executor-cores $executor_cores --executor-memory $executor_mem --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/../intermediate_data/$f $minimum)
 done
