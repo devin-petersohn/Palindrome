@@ -8,8 +8,15 @@
 int main(int argc, char **argv) {
 
 	FILE* dirtyInput = fopen(argv[1], "r");
+	if(!dirtyInput) {
+		fprintf(stderr, "%s\n", "Unable to open file");
+		return -1;
+	}
 	FILE* cleanOutput = fopen("../intermediate_data/cleanOutput_stage1.txt", "w");
-
+	if(!cleanOutput) {
+		fprintf(stderr, "%s\n", "File error. Unable to create.");
+		return -1;	
+	}
 	char* temporary_input_string = malloc(sizeof(char) * BUFFER_LINES_IN);
 	
 	int line_counter_for_total_size = 0;
