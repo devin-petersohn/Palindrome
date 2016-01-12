@@ -26,7 +26,7 @@ object Cleanup {
 				} else {
 					//pw.write(prevline + "\n")
 					full_sequence += prevline + "\n"
-					full_sequence.saveAsTextFile("intermediate_data/" + fasta_id.drop(1).filterNot(_ == ' ').replace(':', '_').replace('|', '_') + ".txt")
+					sc.parallelize(Array(full_sequence)).saveAsTextFile("intermediate_data/" + fasta_id.drop(1).filterNot(_ == ' ').replace(':', '_').replace('|', '_') + ".txt")
 					//println(full_sequence)
 					//pw.close
 					fasta_id = line
@@ -41,7 +41,7 @@ object Cleanup {
 		case ex: IOException => println("Had an IOException trying to read that file")
 		}
 		full_sequence += prevline
-		full_sequence.saveAsTextFile("intermediate_data/" + fasta_id.drop(1).filterNot(_ == ' ').replace(':', '_').replace('|', '_') + ".txt")
+		sc.parallelize(Array(full_sequence)).saveAsTextFile("intermediate_data/" + fasta_id.drop(1).filterNot(_ == ' ').replace(':', '_').replace('|', '_') + ".txt")
 		//println(full_sequence)
 		//pw.close
 
