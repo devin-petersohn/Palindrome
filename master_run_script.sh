@@ -49,14 +49,14 @@ read continue_choice
 if [ "$continue_choice" = "N" ] || [ "$continue_choice" = "n" ]; then
 	exit
 fi
-while [ "$continue_choice" = "Y" ] || [ "$continue_choice" = "y" ]
+while [ "$continue_choice" != "Y" ] || [ "$continue_choice" != "y" ]
 do
 	echo -e "Invalid input. "
 	echo -e "Continue? Y/N:	\c"
 	read continue_choice
 done
 
-hadoop fs -rm -rf intermediate_data
+hadoop fs -rm -r intermediate_data
 hadoop fs -put intermediate_data
 
 for f in `hadoop fs -ls intermediate_data`
