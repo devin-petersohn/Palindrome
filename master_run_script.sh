@@ -6,8 +6,8 @@ echo -e "\n
 \n\nPlease wait while the scripts are compiled and prepared.\n"
 
 (cd cleanUpData && make all)
-hadoop fs -rm -r intermediate_data
-
+rm -rf intermediate_data
+mkdir intermediate_data
 (cd cleanUpData && sbt package)
 (cd PalindromeFinder && sbt package)
 
@@ -48,9 +48,9 @@ do
 	read continue_choice
 done
 
-#hadoop fs -rm -r intermediate_data
-#echo -e "Transferring Files to HDFS. Please wait...\c"
-#hadoop fs -put intermediate_data
+hadoop fs -rm -r intermediate_data
+echo -e "Transferring Files to HDFS. Please wait...\c"
+hadoop fs -put intermediate_data
 
 echo -e "\n\nTransfer complete. Starting to process. Please wait...\c"
 
