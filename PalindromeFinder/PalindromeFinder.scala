@@ -336,7 +336,7 @@ object PalindromeFinder {
 				if(iteration > 1) repeated_sequences = coarseGrainedAggregation(applyPositionToSequence(repeated_sequences), initWindowSize * iteration / 2)
 
 				palindromes = extractPalindromes(repeated_sequences, initWindowSize * iteration)
-				if(!palindromes.isEmpty) palindromes.saveAsObjectFile("results/palindromes/" + initWindowSize * iteration + "/" + chrID)
+				if(!palindromes.isEmpty) palindromes.saveAsObjectFile("/idas/results/palindromes/" + initWindowSize * iteration + "/" + chrID)
 
 				else break
 				iteration *= 2
