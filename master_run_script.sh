@@ -6,6 +6,7 @@ echo -e "\n
 \n\nPlease wait while the scripts are compiled and prepared.\n"
 
 (cd cleanUpData && make all)
+(cd intermediate_data && find . -name "*" -print0 | xargs -0 rm)
 rm -rf intermediate_data
 mkdir intermediate_data
 (cd cleanUpData && sbt package)
@@ -48,20 +49,22 @@ do
 	read continue_choice
 done
 
-hadoop fs -rm -r intermediate_data
-echo -e "Transferring Files to HDFS. Please wait...\c"
-hadoop fs -put intermediate_data
+#hadoop fs -rm -r intermediate_data
+#echo -e "Transferring Files to HDFS. Please wait...\c"
+#hadoop fs -put intermediate_data
 
 echo -e "\n\nTransfer complete. Starting to process. Please wait...\c"
 
-for f in `hadoop fs -ls intermediate_data`
+for f in `ls intermediate_data`
 do
-	(cd PalindromeFinder && spark-submit --master $master --driver-memory $master_mem --num-executors $executor_num --executor-cores $executor_cores --executor-memory $executor_mem --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar intermediate_data/$f $minimum)
+	(cd PalindromeFinder && spark-submit --master $master --driver-memory $master_mem --num-executors $executor_num --executor-cores $executor_cores --executor-memory $executor_mem --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/../intermediate_data/$f $minimum)
 done
 
+(cd intermediate_data && find . -name "*" -print0 | xargs -0 rm)
 exit
 
 fi
+
 if test "$#" -eq 7; then
 
 filepath=$1
@@ -80,15 +83,12 @@ master_mem=$7
 (cd cleanUpData && spark-submit target/scala-2.10/cleanupdata_2.10-0.1.jar ../intermediate_data/cleanOutput_stage1.txt $minimum)
 rm intermediate_data/cleanOutput_stage1.txt
 
-hadoop f -rm -r intermediate_data
-hadoop fs -put intermediate_data
-
 for f in `ls intermediate_data`
 do
-	(cd PalindromeFinder && spark-submit --master $master --driver-memory $master_mem --num-executors $executor_num --executor-cores $executor_cores --executor-memory $executor_mem --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar intermediate_data/$f $minimum)
+	(cd PalindromeFinder && spark-submit --master $master --driver-memory $master_mem --num-executors $executor_num --executor-cores $executor_cores --executor-memory $executor_mem --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/../intermediate_data/$f $minimum)
 done
 
-
+rm intermediate_data/*
 exit
 fi
 
