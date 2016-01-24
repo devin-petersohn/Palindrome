@@ -25,7 +25,7 @@ object Cleanup {
 					pw.write(prevline + "\n")
 					pw.close
 					fasta_id = line
-					pw = new PrintWriter(new File(path+fasta_id.drop(1).filterNot(_ == ' ').replace(':', '_').replace('|', '_') + ".txt"))
+					pw = new PrintWriter(new File(args(0)+"_"+path+fasta_id.drop(1).replace(' ', '_').replace(':', '_').replace('|', '_') + ".txt"))
 					prevline = ""
 				}
 				lineNum += 1
