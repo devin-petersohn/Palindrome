@@ -315,7 +315,7 @@ object PalindromeFinder {
 		val sc = new SparkContext()
 		val initWindowSize = args(1).toInt
 		val file = sc.textFile(args(0), 80)
-		val chrID = args(0).split("/").last //the filename is also the chromosome id, for a unique storage name
+		val chrID = args(0).split("/").last.split(".txt")(0) //the filename is also the chromosome id, for a unique storage name
 		//200 is the length of our lines output from the pipeline
 		val line_length = 200 //this is hardcoded to avoid a miscount on the last line of the file
 
@@ -333,10 +333,10 @@ object PalindromeFinder {
 
 		breakable {
 			while(true){			
-				if(iteration > 1) repeated_sequences = coarseGrainedAggregation(applyPositionToSequence(repeated_sequences), initWindowSize * iteration)
+				if(iteration > 1) repeated_sequences = coarseGrainedAggregation(applyPositionToSequence(repeated_sequences), initWindowSize * iteration / 2)
 
 				palindromes = extractPalindromes(repeated_sequences, initWindowSize * iteration)
-				if(!palindromes.isEmpty) palindromes.saveAsObjectFile("results/other_researcher_data/palindromes/" + initWindowSize * iteration + "/" + chrID)
+				if(!palindromes.isEmpty) palindromes.saveAsObjectFile("results/palindromes/" + initWindowSize * iteration + "/" + chrID)
 
 				else break
 				iteration *= 2
