@@ -37,18 +37,6 @@ read executor_cores
 echo -e "Master memory? \c"
 read master_mem
 
-echo -e "\nDeleting intermediate_data directory on HDFS. Continue? Y/N:	\c"
-read continue_choice
-if [ "$continue_choice" = "N" ] || [ "$continue_choice" = "n" ]; then
-	exit
-fi
-while [ "$continue_choice" != "Y" ] || [ "$continue_choice" != "y" ]
-do
-	echo -e "Invalid input. "
-	echo -e "Continue? Y/N:	\c"
-	read continue_choice
-done
-
 #hadoop fs -rm -r intermediate_data
 #echo -e "Transferring Files to HDFS. Please wait...\c"
 #hadoop fs -put intermediate_data
