@@ -1,4 +1,4 @@
 all: 
-	gcc cleanUp.c -o cleanUpFirst
+	gcc -Wall -O3 cleanUp.c -o cleanUpFirst
 clean: 
 	rm -rf cleanUpFirst

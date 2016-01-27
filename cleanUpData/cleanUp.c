@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
+#include <libgen.h>
 
-#define BUFFER_LINES_IN 100
+#define BUFFER_LINES_IN 1000
 
 int main(int argc, char **argv) {
 
@@ -14,7 +14,8 @@ int main(int argc, char **argv) {
 	}
 	
 	char *output_filename = malloc(sizeof(char) * BUFFER_LINES_IN);
-	strcpy(output_filename, argv[1]);
+	strcpy(output_filename, "../intermediate_data/");
+	strcat(output_filename, basename(argv[1]));
 	strcat(output_filename, ".clean");
 	FILE* cleanOutput = fopen(output_filename, "w");
 	free(output_filename);
@@ -25,7 +26,6 @@ int main(int argc, char **argv) {
 	}
 	
 	char* temporary_input_string = malloc(sizeof(char) * BUFFER_LINES_IN);
-	int line_counter_for_total_size = 0;
 	int current_size = 0;
 
 	while(fgets(temporary_input_string, BUFFER_LINES_IN, dirtyInput) != NULL){
@@ -33,8 +33,7 @@ int main(int argc, char **argv) {
 			temporary_input_string[strlen(temporary_input_string)-1] = '\0';
 			if(temporary_input_string[0] == '>') {
 				if(current_size != 0) fprintf(cleanOutput, "\n");
-				current_size += 1;
-				fprintf(cleanOutput, "%s_%sBREAK_HERE_PALINDROME", argv[1], temporary_input_string);
+				fprintf(cleanOutput, "%s_%sBREAK_HERE_PALINDROME", basename(argv[1]), temporary_input_string);
 				current_size = 1;
 			} else {
 				current_size += 1;
@@ -42,7 +41,7 @@ int main(int argc, char **argv) {
 			}
 		} else{
 			free(temporary_input_string);
-			fprintf(stderr, "%s\n", "Lines too long.");
+			fprintf(stderr, "%s%d\n", "Lines too long. Current line limit: ", BUFFER_LINES_IN);
 			return -1;
 		}
 	}
