@@ -22,9 +22,6 @@ read filepath
 	fi
 echo -e "What is the minimum length palindrome you would like to identify?  \c"
 read minimum
-echo -e "Please wait while the file is parsed and prepared...\c"
-(cd cleanUpData && /share/sw/spark/spark-1.4.1-hadoop2.6/bin/spark-submit  target/scala-2.10/cleanupdata_2.10-0.1.jar ../intermediate_data/cleanOutput_stage1.txt $minimum)
-rm intermediate_data/cleanOutput_stage1.txt
 echo -e "\n"
 echo -e "Please enter the following Spark configuration parameters: \nMaster Node? \c"
 read master 
@@ -37,18 +34,8 @@ read executor_cores
 echo -e "Master memory? \c"
 read master_mem
 
-#hadoop fs -rm -r intermediate_data
-#echo -e "Transferring Files to HDFS. Please wait...\c"
-#hadoop fs -put intermediate_data
+(cd PalindromeFinder && spark-submit --master $master --driver-memory $master_mem --num-executors $executor_num --executor-cores $executor_cores --executor-memory $executor_mem --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/../intermediate_data/`basename $filepath`.clean $minimum)
 
-echo -e "\n\nTransfer complete. Starting to process. Please wait...\c"
-
-for f in `ls intermediate_data`
-do
-	(cd PalindromeFinder && /share/sw/spark/spark-1.4.1-hadoop2.6/bin/spark-submit --master $master --driver-memory $master_mem --num-executors $executor_num --executor-cores $executor_cores --executor-memory $executor_mem --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/../intermediate_data/$f $minimum)
-done
-
-(cd intermediate_data && find . -name "*" -print0 | xargs -0 rm)
 exit
 
 fi
@@ -68,15 +55,8 @@ master_mem=$7
 		echo -e "Error encountered."
 		exit
 	fi
-(cd cleanUpData && /share/sw/spark/spark-1.4.1-hadoop2.6/bin/spark-submit  target/scala-2.10/cleanupdata_2.10-0.1.jar ../intermediate_data/cleanOutput_stage1.txt $minimum)
-rm intermediate_data/cleanOutput_stage1.txt
 
-for f in `ls intermediate_data`
-do
-	(cd PalindromeFinder && /share/sw/spark/spark-1.4.1-hadoop2.6/bin/spark-submit --master $master --driver-memory $master_mem --num-executors $executor_num --executor-cores $executor_cores --executor-memory $executor_mem --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/../intermediate_data/$f $minimum)
-done
-
-(cd intermediate_data && find . -name "*" -print0 | xargs -0 rm)
+(cd PalindromeFinder && spark-submit --master $master --driver-memory $master_mem --num-executors $executor_num --executor-cores $executor_cores --executor-memory $executor_mem --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/../intermediate_data/`basename $filepath`.clean $minimum)
 
 exit
 fi
