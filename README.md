@@ -10,6 +10,10 @@ Requirements for use:
 
 This repository includes a full pipeline from cleaning the input sequence to outputting the palindromes to HDFS. 
 
+####Preparing the data
+
+To prepare the data, you will need to run the `cleanUp.c` script to properly parse the input data. The data doesn’t have to be very clean for this parser. You may pass in multiple fasta sequences delineated by `>IDENTIFIER` . The `IDENTIFIER` should be unique and meaningful to you, as this is how the results will stored for searching later.
+
 ####Using the included `master_run_script.sh`
 ######Single job mode
 
@@ -32,18 +36,9 @@ If you do not include enough parameters, the script will not allow you to contin
 ####Manually Building and Running the Project
 ######Preparing the data
 
-To prepare the data, you will need to run the `cleanUp.c` script to properly parse the input data. The data doesn’t have to be very clean for this parser. You may pass in multiple fasta sequences delineated by `>IDENTIFIER` . The `IDENTIFIER` should be unique and meaningful to you, as this is how the results will stored for searching later.
-
-* Step 1: Compile and run `cleanUp.c`. There is an included Makefile for convenience.
+Compile and run `cleanUp.c`. There is an included Makefile for convenience.
 	
 		usage: cleanUpFirst <fasta_file>
-
-* Step 2: Compile and run `cleanUpData.scala`. There is an included SBT build file for convenience.
-
-		usage: spark-submit \
-		target/scala-2.10/cleanupdata_2.10-0.1.jar \
-		../intermediate_data/cleanOutput_stage1.txt \
-		<minimum_palindrome_length>
 
 ######Running the Palindrome Finder
 
