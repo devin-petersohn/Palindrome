@@ -319,7 +319,7 @@ return true
 		//200 is the length of our lines output from the pipeline
 		//val line_length = 200 //this is hardcoded to avoid a miscount on the last line of the file
 
-		val words = file.flatMap(line => line.split("BREAK_HERE_PALINDROME")(1).sliding(initWindowSize).zipWithIndex.filter(seq => filterSeqs(seq._1, initWindowSize)).map(k_block => ((k_block._1, line.split("BREAK_HERE_PALINDROME")(0).replaceAll("[>. /]", "_")), k_block._2)))
+		val words = file.flatMap(line => line.split("BREAK_HERE_PALINDROME")(1).sliding(initWindowSize).zipWithIndex.filter(seq => filterSeqs(seq._1, initWindowSize)).map(k_block => ((k_block._1, line.split("BREAK_HERE_PALINDROME")(0).replaceAll("[>. /]", "_")), k_block._2+1)))
 		//		val words = file.zipWithIndex.flatMap( l => ( l._1.sliding(initWindowSize).zipWithIndex.filter(seq => filterSeqs(seq._1, initWindowSize)).map( f => ((( f._1, chrID)),((f._2+1)+((line_length)*(l._2 - 1))).toInt))))
 
 		val compWords = words.map(f => ((complement(f._1), -1 * (f._2 + f._1._1.length))))
@@ -338,7 +338,7 @@ return true
 				if(iteration > 1) repeated_sequences = coarseGrainedAggregation(applyPositionToSequence(repeated_sequences), initWindowSize * iteration / 2)
 
 				palindromes = extractPalindromes(repeated_sequences, initWindowSize * iteration)
-				if(!palindromes.isEmpty) palindromes.saveAsObjectFile("/idas/results/palindromes/" + initWindowSize * iteration + "/" + args(0))
+				if(!palindromes.isEmpty) palindromes.collect.foreach(println)//palindromes.saveAsObjectFile("/idas/results/palindromes/" + initWindowSize * iteration + "/" + args(0))
 
 				else break
 				iteration *= 2
