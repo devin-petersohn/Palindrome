@@ -23,13 +23,13 @@ object PalindromeFinder {
 	*	Invalid string returns false
 	*
 	*/
-	def filterSeqs(string: String, initWindowSize: Int): Boolean = {
-		//if(string.contains("N")) return false
-		for(i <- string) {
-			if(i != 'A' && i != 'C' && i != 'T' && i != 'G') return false
-		}
-		return true
-	}
+def filterSeqs(string: String, initWindowSize: Int): Boolean = {
+//if(string.contains("N")) return false
+for(i <- string) {
+if(i != 'A' && i != 'C' && i != 'T' && i != 'G') return false
+}
+return true
+}
 
 	/*
 	*
@@ -243,9 +243,9 @@ object PalindromeFinder {
 	*		returned._2: the identification of the origin of this specific sequence (chromosome id and species id)
 	*
 	*/
-	def merge(x: ((String,String)), y: ((String,String))): ((String,String)) = { 
-		if(x._1.contains("*")) return ((x._1.dropRight(1)+y._1 , x._2))
-		else return ((y._1.dropRight(1)+x._1, x._2))
+	def merge(x: String, y: String): String = { 
+		if(x.contains("*")) return x.dropRight(1)+y
+		else return y.dropRight(1)+x
 	}
 
 	/*
@@ -269,8 +269,8 @@ object PalindromeFinder {
 	*/
 	def coarseGrainedAggregation(blocks: org.apache.spark.rdd.RDD[((String, String), Int)], windowSize: Int): org.apache.spark.rdd.RDD[((String, String), Iterable[(Int)])] = {
 		return blocks.map(_.swap)
-		.flatMap(f => Iterable((f._1,f._2),((f._1 + f._2._1.length),((f._2._1+"*",f._2._2)))))
-		.reduceByKey((a,b) => merge(a,b))
+		.flatMap(f => Iterable(((f._1, f._2._2),f._2._1),(((f._1 + f._2._1.length), f._2._2),((f._2._1+"*")))))
+		.reduceByKey((a,b) => merge(a,b)).map(z => ((z._1._1, ((z._2, z._1._2)))))
 		.filter(_._2._1.length>windowSize+1)
 		.map(f => (f._2,((f._1-f._2._1.length/2))))
 		.groupByKey
@@ -315,11 +315,13 @@ object PalindromeFinder {
 		val sc = new SparkContext()
 		val initWindowSize = args(1).toInt
 		val file = sc.textFile(args(0), 80)
-		val chrID = args(0).split("/").last.split(".txt")(0) //the filename is also the chromosome id, for a unique storage name
+		//val chrID = args(0).split("/").last.split(".txt")(0) //the filename is also the chromosome id, for a unique storage name
 		//200 is the length of our lines output from the pipeline
-		val line_length = 200 //this is hardcoded to avoid a miscount on the last line of the file
+		//val line_length = 200 //this is hardcoded to avoid a miscount on the last line of the file
 
-		val words = file.zipWithIndex.flatMap( l => ( l._1.sliding(initWindowSize).zipWithIndex.filter(seq => filterSeqs(seq._1, initWindowSize)).map( f => ((( f._1, chrID)),((f._2+1)+((line_length)*(l._2 - 1))).toInt))))
+		val words = file.flatMap(line => line.split("BREAK_HERE_PALINDROME")(1).sliding(initWindowSize).zipWithIndex.filter(seq => filterSeqs(seq._1, initWindowSize)).map(k_block => ((k_block._1, line.split("BREAK_HERE_PALINDROME")(0).replaceAll("[>. /]", "_")), k_block._2)))
+		//		val words = file.zipWithIndex.flatMap( l => ( l._1.sliding(initWindowSize).zipWithIndex.filter(seq => filterSeqs(seq._1, initWindowSize)).map( f => ((( f._1, chrID)),((f._2+1)+((line_length)*(l._2 - 1))).toInt))))
+
 		val compWords = words.map(f => ((complement(f._1), -1 * (f._2 + f._1._1.length))))
 
 		//all the words of length equal to initWindowSize
@@ -336,7 +338,7 @@ object PalindromeFinder {
 				if(iteration > 1) repeated_sequences = coarseGrainedAggregation(applyPositionToSequence(repeated_sequences), initWindowSize * iteration / 2)
 
 				palindromes = extractPalindromes(repeated_sequences, initWindowSize * iteration)
-				if(!palindromes.isEmpty) palindromes.saveAsObjectFile("/idas/results/palindromes/" + initWindowSize * iteration + "/" + chrID)
+				if(!palindromes.isEmpty) palindromes.saveAsObjectFile("/idas/results/palindromes/" + initWindowSize * iteration + "/" + args(0))
 
 				else break
 				iteration *= 2
