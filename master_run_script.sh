@@ -6,10 +6,6 @@ echo -e "\n
 \n\nPlease wait while the scripts are compiled and prepared.\n"
 
 (cd cleanUpData && make all)
-(cd intermediate_data && find . -name "*" -print0 | xargs -0 rm)
-rm -rf intermediate_data
-mkdir intermediate_data
-(cd cleanUpData && sbt package)
 (cd PalindromeFinder && sbt package)
 
 if test "$#" -eq 0; then
