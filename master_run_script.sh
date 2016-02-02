@@ -16,19 +16,6 @@ read filepath
 		echo -e "Error encountered."
 		exit
 	fi
-echo -e "What is the minimum length palindrome you would like to identify?  \c"
-read minimum
-echo -e "\n"
-echo -e "Please enter the following Spark configuration parameters: \nMaster Node? \c"
-read master 
-echo -e "Number of executors? \c"
-read executor_num
-echo -e "Memory per executor? \c"
-read executor_mem
-echo -e "Number of cores per executor? \c"
-read executor_cores
-echo -e "Master memory? \c"
-read master_mem
 
 (cd PalindromeFinder && MASTER=$MASTER /share/sw/spark/spark-1.4.1-hadoop2.6/bin/spark-submit --driver-memory 10G --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/../intermediate_data/`basename $filepath`.clean $minimum)
 
