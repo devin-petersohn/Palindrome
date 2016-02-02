@@ -30,7 +30,7 @@ read executor_cores
 echo -e "Master memory? \c"
 read master_mem
 
-(cd PalindromeFinder && spark-submit --master $master --driver-memory $master_mem --num-executors $executor_num --executor-cores $executor_cores --executor-memory $executor_mem --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/../intermediate_data/`basename $filepath`.clean $minimum)
+(cd PalindromeFinder && MASTER=$MASTER /share/sw/spark/spark-1.4.1-hadoop2.6/bin/spark-submit --driver-memory 10G --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/../intermediate_data/`basename $filepath`.clean $minimum)
 
 exit
 
