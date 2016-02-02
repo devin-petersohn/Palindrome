@@ -1,9 +1,6 @@
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks._
 import java.io._
-import java.text.DateFormat
-import java.text.SimpleDateFormat
-import java.util.Calendar
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
 import org.apache.log4j.PropertyConfigurator
