@@ -17,6 +17,9 @@ read filepath
 		exit
 	fi
 
+echo -e "What is the minimum length palindrome you would like to identify?  \c"
+read minimum
+
 (cd PalindromeFinder && MASTER=$MASTER /share/sw/spark/spark-1.4.1-hadoop2.6/bin/spark-submit --driver-memory 10G --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/../intermediate_data/`basename $filepath`.clean $minimum)
 
 exit
