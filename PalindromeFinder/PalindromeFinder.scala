@@ -1,9 +1,7 @@
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks._
-import java.io._
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkConf
-import org.apache.log4j.PropertyConfigurator
 
 object PalindromeFinder {
 	/*
@@ -20,13 +18,12 @@ object PalindromeFinder {
 	*	Invalid string returns false
 	*
 	*/
-def filterSeqs(string: String, initWindowSize: Int): Boolean = {
-//if(string.contains("N")) return false
-for(i <- string) {
-if(i != 'A' && i != 'C' && i != 'T' && i != 'G') return false
-}
-return true
-}
+	def filterSeqs(string: String): Boolean = {
+		for(i <- string) {
+			if(i != 'A' && i != 'C' && i != 'T' && i != 'G') return false
+		}
+		return true
+	}
 
 	/*
 	*
@@ -313,10 +310,10 @@ return true
 		val initWindowSize = args(1).toInt
 		val file = sc.textFile(args(0), 80)
 
-		//
-		val words = file.flatMap(line => line.split("BREAK_HERE_PALINDROME")(1).sliding(initWindowSize).zipWithIndex.filter(seq => filterSeqs(seq._1, initWindowSize)).map(k_block => ((k_block._1, line.split("BREAK_HERE_PALINDROME")(0).replaceAll("[>. /]", "_")), k_block._2+1)))
-		//		val words = file.zipWithIndex.flatMap( l => ( l._1.sliding(initWindowSize).zipWithIndex.filter(seq => filterSeqs(seq._1, initWindowSize)).map( f => ((( f._1, chrID)),((f._2+1)+((line_length)*(l._2 - 1))).toInt))))
+		val key_for_indexes = file.zipWithIndex.map(line => ((line._1.split("BREAK_HERE_PALINDROME")(0), line._2.toString)))
+		key_for_indexes.saveAsObjectFile("/idas/results/palindromes/keys_for_indexes/" + args(0).split("/").last.split(".clean")(0))
 
+		val words = file.zipWithIndex.flatMap(line => line._1.split("BREAK_HERE_PALINDROME")(1).sliding(initWindowSize).zipWithIndex.filter(seq => filterSeqs(seq._1)).map(k_block => ((k_block._1, line._2.toString), k_block._2+1)))
 		val compWords = words.map(f => ((complement(f._1), -1 * (f._2 + f._1._1.length))))
 
 		//all the words of length equal to initWindowSize
@@ -340,79 +337,6 @@ return true
 			}
 		}
 
-
-//Below is the old method.
-/*
-		val smallestPalindromes = extractPalindromes(allWords, initWindowSize)
-		if(!smallestPalindromes.isEmpty) {
-			smallestPalindromes.saveAsObjectFile("results/other_researcher_data/palindromes/" + initWindowSize + "/" + chrID)
-
-			val doubleLengthWords = coarseGrainedAggregation(applyPositionToSequence(allWords), initWindowSize)
-			val doublePalindromes = extractPalindromes(doubleLengthWords, initWindowSize * 2)	
-			if(!doublePalindromes.isEmpty) {
-				doublePalindromes.saveAsObjectFile("results/other_researcher_data/palindromes/" + initWindowSize * 2 + "/" + chrID)
-
-				val fourTimesLengthWords = coarseGrainedAggregation(applyPositionToSequence(doubleLengthWords), initWindowSize * 2)
-				val fourTimesPalindromes = extractPalindromes(fourTimesLengthWords, initWindowSize * 4)		
-				if(!fourTimesPalindromes.isEmpty) {
-					fourTimesPalindromes.saveAsObjectFile("results/other_researcher_data/palindromes/" + initWindowSize * 4 + "/" + chrID)
-
-					val eightTimesLengthWords = coarseGrainedAggregation(applyPositionToSequence(fourTimesLengthWords), initWindowSize * 4)
-					val eightTimesPalindromes = extractPalindromes(eightTimesLengthWords, initWindowSize * 8)
-					if(!eightTimesPalindromes.isEmpty) {
-						eightTimesPalindromes.saveAsObjectFile("results/other_researcher_data/palindromes/" + initWindowSize * 8 + "/" + chrID)
-
-						val sixteenTimesLengthWords = coarseGrainedAggregation(applyPositionToSequence(eightTimesLengthWords), initWindowSize * 8)
-						val sixteenTimesPalindromes = extractPalindromes(sixteenTimesLengthWords, initWindowSize * 16)
-						if(!sixteenTimesPalindromes.isEmpty) {
-							sixteenTimesPalindromes.saveAsObjectFile("results/other_researcher_data/palindromes/" + initWindowSize * 16 + "/" + chrID)
-
-							val thirtytwoTimesLengthWords = coarseGrainedAggregation(applyPositionToSequence(sixteenTimesLengthWords), initWindowSize * 16)
-							val thirtytwoTimesPalindromes = extractPalindromes(thirtytwoTimesLengthWords, initWindowSize * 32)
-							if(!thirtytwoTimesPalindromes.isEmpty) {
-								thirtytwoTimesPalindromes.saveAsObjectFile("results/other_researcher_data/palindromes/" + initWindowSize * 32 + "/" + chrID)
-
-								val sixtyfourTimesLengthWords = coarseGrainedAggregation(applyPositionToSequence(thirtytwoTimesLengthWords), initWindowSize * 32)
-								val sixtyfourTimesPalindromes = extractPalindromes(sixtyfourTimesLengthWords, initWindowSize * 64)
-								if(!sixtyfourTimesPalindromes.isEmpty) {
-									sixtyfourTimesPalindromes.saveAsObjectFile("results/other_researcher_data/palindromes/" + initWindowSize * 64 + "/" + chrID)
-
-									val onetwentyeightTimesLengthWords = coarseGrainedAggregation(applyPositionToSequence(sixtyfourTimesLengthWords), initWindowSize * 64)
-									val onetwentyeightTimesPalindromes = extractPalindromes(onetwentyeightTimesLengthWords, initWindowSize * 128)
-									if(!onetwentyeightTimesPalindromes.isEmpty) {
-										onetwentyeightTimesPalindromes.saveAsObjectFile("results/other_researcher_data/palindromes/" + initWindowSize * 128 + "/" + chrID)
-
-										val twofiftysixTimesLengthWords = coarseGrainedAggregation(applyPositionToSequence(onetwentyeightTimesLengthWords), initWindowSize * 128)
-										val twofiftysixTimesPalindromes = extractPalindromes(twofiftysixTimesLengthWords, initWindowSize * 256)
-										if(!twofiftysixTimesPalindromes.isEmpty) {
-											twofiftysixTimesPalindromes.saveAsObjectFile("results/other_researcher_data/palindromes/" + initWindowSize * 256 + "/" + chrID)
-
-											val fivetwelveTimesLengthWords = coarseGrainedAggregation(applyPositionToSequence(twofiftysixTimesLengthWords), initWindowSize * 256)
-											val fivetwelveTimesPalindromes = extractPalindromes(fivetwelveTimesLengthWords, initWindowSize * 512)
-											if(!fivetwelveTimesPalindromes.isEmpty) { 
-												fivetwelveTimesPalindromes.saveAsObjectFile("results/other_researcher_data/palindromes/" + initWindowSize * 512 + "/" + chrID)
-											
-											
-											}//512TimePal
-
-										}//256TimePal
-
-									}//128TimePal
-
-								}//sixtyfourTimePal
-
-							}//thirtytwoTimePal
-
-						}//sixteenTimePal
-
-					}//eightTimePal
-
-				}//fourTimePal
-
-			}//doublePal
-
-		}//smallestPal
-*/
 	}
 
 }
