@@ -314,6 +314,7 @@ object PalindromeFinder {
 		key_for_indexes.saveAsObjectFile("hdfs://c12u1:9090/idas/results/palindromes/keys_for_indexes/" + args(0).split("/").last.split(".clean")(0))
 
 		val words = file.zipWithIndex.flatMap(line => line._1.split("BREAK_HERE_PALINDROME")(1).sliding(initWindowSize).zipWithIndex.filter(seq => filterSeqs(seq._1)).map(k_block => ((k_block._1, line._2.toString), k_block._2+1)))
+		words.repartition(80)
 		val compWords = words.map(f => ((complement(f._1), -1 * (f._2 + f._1._1.length))))
 
 		//all the words of length equal to initWindowSize
