@@ -311,7 +311,7 @@ object PalindromeFinder {
 		val file = sc.textFile(args(0), 80)
 
 		val key_for_indexes = file.zipWithIndex.map(line => ((line._1.split("BREAK_HERE_PALINDROME")(0), line._2.toString)))
-		key_for_indexes.saveAsObjectFile("hdfs://c12u1:9090/idas/results/palindromes/keys_for_indexes/" + args(0).split("/").last.split(".clean")(0))
+		key_for_indexes.saveAsObjectFile("hdfs://c12u1:9091/idas/results/palindromes/keys_for_indexes/" + args(0).split("/").last.split(".clean")(0))
 
 		val words = file.zipWithIndex.flatMap(line => line._1.split("BREAK_HERE_PALINDROME")(1).sliding(initWindowSize).zipWithIndex.filter(seq => filterSeqs(seq._1)).map(k_block => ((k_block._1, line._2.toString), k_block._2+1)))
 		words.repartition(80)
@@ -331,7 +331,7 @@ object PalindromeFinder {
 				if(iteration > 1) repeated_sequences = coarseGrainedAggregation(applyPositionToSequence(repeated_sequences), initWindowSize * iteration / 2)
 
 				palindromes = extractPalindromes(repeated_sequences, initWindowSize * iteration)
-				if(!palindromes.isEmpty) palindromes.saveAsObjectFile("hdfs://c12u1:9090/idas/results/palindromes/" + initWindowSize * iteration + "/" + args(0).split("/").last.split(".clean")(0))
+				if(!palindromes.isEmpty) palindromes.saveAsObjectFile("hdfs://c12u1:9091/idas/results/palindromes/" + initWindowSize * iteration + "/" + args(0).split("/").last.split(".clean")(0))
 
 				else break
 				iteration *= 2
