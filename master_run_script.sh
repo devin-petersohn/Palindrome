@@ -5,6 +5,8 @@ echo -e "\n
 \n\nPlease note: This script only supports one FASTA file at a time
 \n\nPlease wait while the scripts are compiled and prepared.\n"
 
+module load sbt
+module load mri/hdfs
 (cd cleanUpData && make all)
 (cd PalindromeFinder && sbt package)
 
@@ -20,7 +22,7 @@ read filepath
 echo -e "What is the minimum length palindrome you would like to identify?  \c"
 read minimum
 
-(cd PalindromeFinder && MASTER=$MASTER /share/sw/spark/spark-1.4.1-hadoop2.6/bin/spark-submit --driver-memory 10G --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/../intermediate_data/`basename $filepath`.clean $minimum)
+(cd PalindromeFinder && /share/sw/spark/spark-1.4.1-hadoop2.6/bin/spark-submit --driver-memory 10G --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/../intermediate_data/`basename $filepath`.clean $minimum)
 
 exit
 
