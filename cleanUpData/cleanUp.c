@@ -21,8 +21,10 @@ int main(int argc, char **argv) {
 	FILE* cleanOutput = fopen(output_filename, "w");
 	FILE* list_of_files = fopen("../intermediate_data/list_of_files.clean");
 	fprintf(list_of_files, "%s\n", output_filename);
-	char buffer[256];
+	char integer_buffer[1024];
+	char previous_name_buffer[1024];
 	int file_count = 0;
+	int line_length = 0;
 
 	if(!cleanOutput) {
 		fprintf(stderr, "%s\n", "File error. Unable to create.");
@@ -36,8 +38,9 @@ int main(int argc, char **argv) {
 		if(temporary_input_string[strlen(temporary_input_string)-1] == '\n'){
 			temporary_input_string[strlen(temporary_input_string)-1] = '\0';
 			if(temporary_input_string[0] == '>') {
+				strcpy(previous_name_buffer, temporary_input_string);
 				if(current_size > MAX_NUMBER_OF_LINES) {
-					file_count++;
+					file_count+= 1;
 					fclose(cleanOutput);
 					output_filename[strlen(output_filename) - 7] = '\0';
 					sprintf(buffer, "%d", file_count);
