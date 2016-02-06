@@ -2,9 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <libgen.h>
+#include <math.h>
 
 #define BUFFER_LINES_IN 1000
-#define MAX_NUMBER_OF_LINES 100000
+#define MAX_NUMBER_OF_LINES 10000
 
 int main(int argc, char **argv) {
 
@@ -19,12 +20,11 @@ int main(int argc, char **argv) {
 	strcat(output_filename, basename(argv[1]));
 	strcat(output_filename, ".clean");
 	FILE* cleanOutput = fopen(output_filename, "w");
-	FILE* list_of_files = fopen("../intermediate_data/list_of_files.clean");
+	FILE* list_of_files = fopen("../intermediate_data/list_of_files.clean", "w");
 	fprintf(list_of_files, "%s\n", output_filename);
-	char integer_buffer[1024];
+	char buffer[1024];
 	char previous_name_buffer[1024];
 	int file_count = 0;
-	int line_length = 0;
 
 	if(!cleanOutput) {
 		fprintf(stderr, "%s\n", "File error. Unable to create.");
@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
 				if(current_size > MAX_NUMBER_OF_LINES) {
 					file_count+= 1;
 					fclose(cleanOutput);
-					output_filename[strlen(output_filename) - 7] = '\0';
+					output_filename[strlen(output_filename) - 7 - (int) log10l(file_count)] = '\0';
 					sprintf(buffer, "%d", file_count);
 					strcat(output_filename, buffer);
 					strcat(output_filename, ".clean");
