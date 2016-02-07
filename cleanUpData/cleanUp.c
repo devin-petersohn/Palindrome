@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
 				if(current_size > MAX_NUMBER_OF_LINES) {
 					file_count+= 1;
 					fclose(cleanOutput);
-					output_filename[strlen(output_filename) - 7 - (int) log10l(file_count)] = '\0';
+					output_filename[strlen(output_filename) - 7 - (int) log10(file_count)] = '\0';
 					sprintf(buffer, "%d", file_count);
 					strcat(output_filename, buffer);
 					strcat(output_filename, ".clean");
