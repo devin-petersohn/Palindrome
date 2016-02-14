@@ -22,9 +22,9 @@ read filepath
 echo -e "What is the minimum length palindrome you would like to identify?  \c"
 read minimum
 
-for f in `cat /intermediate_data/list_of_files.clean`; do
+for f in `cat intermediate_data/list_of_files.clean`; do
 
-(cd PalindromeFinder && /share/sw/spark/spark-1.4.1-hadoop2.6/bin/spark-submit --driver-memory 10G --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/$f $minimum)
+(cd PalindromeFinder && spark-submit --driver-memory 10G --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/$f $minimum)
 
 done
 exit
