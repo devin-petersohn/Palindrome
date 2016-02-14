@@ -7,6 +7,7 @@ echo -e "\n
 
 module load sbt
 module load mri/hdfs
+module load spark
 (cd cleanUpData && make all)
 (cd PalindromeFinder && sbt package)
 
@@ -31,25 +32,23 @@ exit
 
 fi
 
-if test "$#" -eq 7; then
+if test "$#" -eq 2; then
 
 filepath=$1
 minimum=$2
-master=$3
-executor_num=$4
-executor_mem=$5
-executor_cores=$6
-master_mem=$7
 
 (cd cleanUpData && ./cleanUpFirst $filepath)
 	if test "$?" -ne 0; then
 		echo -e "Error encountered."
 		exit
 	fi
+for f in `cat intermediate_data/list_of_files.clean`; do
 
-(cd PalindromeFinder && spark-submit --master $master --driver-memory $master_mem --num-executors $executor_num --executor-cores $executor_cores --executor-memory $executor_mem --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/../intermediate_data/`basename $filepath`.clean $minimum)
+(cd PalindromeFinder && spark-submit --driver-memory 10G --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/$f $minimum)
+
+done
 
 exit
 fi
 
-echo -e "usage: master_run_script.sh <filepath> <minimum> <master> <executor_num> <executor_mem> <executor_cores> <master_mem>"
+echo -e "usage: master_run_script.sh <filepath> <minimum>"
