@@ -8,6 +8,10 @@ echo -e "\n
 module load sbt
 module load mri/mri-hdfs-gpu
 module load spark
+
+rm -rf intermediate_data
+mkdir intermediate_data
+
 (cd cleanUpData && make all)
 (cd PalindromeFinder && sbt package)
 
