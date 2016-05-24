@@ -6,7 +6,7 @@ echo -e "\n
 \n\nPlease wait while the scripts are compiled and prepared.\n"
 
 module load sbt
-module load mri/hdfs
+module load mri/mri-hdfs-gpu
 module load spark
 (cd cleanUpData && make all)
 (cd PalindromeFinder && sbt package)
@@ -25,7 +25,7 @@ read minimum
 
 for f in `cat intermediate_data/list_of_files.clean`; do
 
-(cd PalindromeFinder && srun -p GPU --mem=50G -c 10 spark-submit --driver-memory 50G --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/$f $minimum)
+(cd PalindromeFinder && spark-submit --driver-memory 10G --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/$f $minimum)
 
 done
 exit
@@ -44,7 +44,7 @@ minimum=$2
 	fi
 for f in `cat intermediate_data/list_of_files.clean`; do
 
-(cd PalindromeFinder && srun -p GPU --mem=50G -c 10 spark-submit --driver-memory 50G --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/$f $minimum)
+(cd PalindromeFinder && spark-submit --driver-memory 10G --class PalindromeFinder target/scala-2.10/palindromefinder_2.10-0.1.jar file://`pwd`/$f $minimum)
 
 done
 
