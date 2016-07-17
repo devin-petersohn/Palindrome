@@ -5,7 +5,7 @@
 #include <math.h>
 
 #define BUFFER_LINES_IN 1000
-#define MAX_NUMBER_OF_LINES 10000
+#define MAX_NUMBER_OF_LINES 1000000
 
 int main(int argc, char **argv) {
 
